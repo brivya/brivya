@@ -48,6 +48,7 @@ export interface ActionContext {
 export interface ActionRequest<Input = unknown> {
   requestId: string;
   capability: string;
+  capabilityVersion?: string;
   actor: Actor;
   principal?: Principal;
   delegation?: Delegation;
