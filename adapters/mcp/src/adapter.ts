@@ -8,6 +8,7 @@ import {
 import {
   McpServer,
   fromJsonSchema,
+  type CallToolResult,
 } from "@modelcontextprotocol/server";
 import type {
   BusinessRuntime,
@@ -26,14 +27,7 @@ export interface McpToolProjection {
   capability: CapabilityContract;
 }
 
-export interface McpToolCallResult {
-  content: Array<{
-    type: "text";
-    text: string;
-  }>;
-  structuredContent?: unknown;
-  isError?: boolean;
-}
+export type McpToolCallResult = CallToolResult;
 
 export class BrivyaMcpAdapter {
   readonly #runtime: BusinessRuntime;
@@ -230,7 +224,8 @@ function mcpSuccessResult(
         text: JSON.stringify(result.output),
       },
     ],
-    structuredContent: result.output,
+    structuredContent:
+      result.output as CallToolResult["structuredContent"],
   };
 }
 
