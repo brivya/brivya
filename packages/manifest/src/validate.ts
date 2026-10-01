@@ -1,4 +1,4 @@
-import Ajv2020 from "ajv/dist/2020.js";
+import * as Ajv2020Module from "ajv/dist/2020.js";
 
 import { businessAgentManifestSchema } from "./schema.js";
 import type {
@@ -28,6 +28,8 @@ export interface ManifestValidationResult {
   issues: ManifestValidationIssue[];
   manifest?: BusinessAgentManifest;
 }
+
+const Ajv2020 = Ajv2020Module.default;
 
 const ajv = new Ajv2020({
   allErrors: true,
