@@ -1,0 +1,22 @@
+{
+  "name": "brivya",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Infrastructure for the Agentic Business Web.",
+  "license": "Apache-2.0",
+  "workspaces": [
+    "packages/*",
+    "adapters/*",
+    "connectors/*",
+    "examples/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
