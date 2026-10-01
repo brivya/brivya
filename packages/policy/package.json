@@ -1,0 +1,22 @@
+{
+  "name": "@brivya/policy",
+  "version": "0.1.0-alpha.1",
+  "description": "Policy evaluation contracts and baseline engine for Brivya.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./dist/src/index.js"
+    }
+  },
+  "types": "./src/index.ts",
+  "files": ["dist"],
+  "dependencies": {
+    "@brivya/core": "0.1.0-alpha.1"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  }
+}
