@@ -29,7 +29,25 @@ export interface ManifestValidationResult {
   manifest?: BusinessAgentManifest;
 }
 
-const Ajv2020 = Ajv2020Module.default;
+interface AjvErrorLike {
+  instancePath: string;
+  message?: string;
+}
+
+interface ValidateFunctionLike {
+  (input: unknown): boolean;
+  errors?: AjvErrorLike[] | null;
+}
+
+interface AjvLike {
+  compile(schema: unknown): ValidateFunctionLike;
+}
+
+type AjvConstructor = new (options?: Record<string, unknown>) => AjvLike;
+
+const Ajv2020 = (
+  ("default" in Ajv2020Module ? Ajv2020Module.default : Ajv2020Module) as unknown
+) as AjvConstructor;
 
 const ajv = new Ajv2020({
   allErrors: true,
