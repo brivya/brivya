@@ -1,0 +1,21 @@
+{
+  "name": "@brivya/core",
+  "version": "0.1.0-alpha.1",
+  "description": "Canonical Business Agent domain contracts for Brivya.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./dist/src/index.js"
+    }
+  },
+  "types": "./src/index.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  }
+}
