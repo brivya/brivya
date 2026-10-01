@@ -31,6 +31,7 @@ import {
 } from "./digest.js";
 import {
   InMemoryIdempotencyStore,
+  type IdempotencyClaim,
   type IdempotencyStore,
 } from "./idempotency.js";
 import { CapabilityRegistry } from "./registry.js";
@@ -114,7 +115,7 @@ export class BusinessRuntime {
       | {
           key: string;
           digest: string;
-          acquired: boolean;
+          claim: IdempotencyClaim<ExecutionResult>;
         }
       | undefined;
 
@@ -155,58 +156,49 @@ export class BusinessRuntime {
         request,
       );
 
-      if (idempotency && !idempotency.acquired) {
-        const claim = await this.#idempotency.claim(
-          idempotency.key,
-          idempotency.digest,
+      if (idempotency?.claim.status === "replay") {
+        await this.#audit.append(
+          this.#auditFactory.create({
+            capability,
+            request,
+            outcome: "replayed",
+            transactionId: idempotency.claim.result.transaction.id,
+            details: {
+              idempotency_key: request.idempotencyKey,
+            },
+          }),
         );
 
-        if (claim.status === "replay") {
-          await this.#audit.append(
-            this.#auditFactory.create({
-              capability,
-              request,
-              outcome: "replayed",
-              transactionId: claim.result.transaction.id,
-              details: {
-                idempotency_key: request.idempotencyKey,
-              },
-            }),
-          );
+        return {
+          ...(idempotency.claim.result as ExecutionResult<Output>),
+          replayed: true,
+        };
+      }
 
-          return {
-            ...(claim.result as ExecutionResult<Output>),
-            replayed: true,
-          };
-        }
-
-        if (claim.status === "in_flight") {
-          await this.#audit.append(
-            this.#auditFactory.create({
-              capability,
-              request,
-              outcome: "in_flight",
-              details: {
-                idempotency_key: request.idempotencyKey,
-              },
-            }),
-          );
-
-          throw new BrivyaError(
-            "CONFLICT",
-            "An action with the same idempotency key is already in flight.",
-            {
-              retryable: true,
-              details: {
-                capability: capability.id,
-                idempotency_key: request.idempotencyKey,
-                reason: "idempotency_in_flight",
-              },
+      if (idempotency?.claim.status === "in_flight") {
+        await this.#audit.append(
+          this.#auditFactory.create({
+            capability,
+            request,
+            outcome: "in_flight",
+            details: {
+              idempotency_key: request.idempotencyKey,
             },
-          );
-        }
+          }),
+        );
 
-        idempotency.acquired = true;
+        throw new BrivyaError(
+          "CONFLICT",
+          "An action with the same idempotency key is already in flight.",
+          {
+            retryable: true,
+            details: {
+              capability: capability.id,
+              idempotency_key: request.idempotencyKey,
+              reason: "idempotency_in_flight",
+            },
+          },
+        );
       }
 
       transaction = await this.#transactions.create(
@@ -249,7 +241,7 @@ export class BusinessRuntime {
         replayed: false,
       };
 
-      if (idempotency?.acquired) {
+      if (idempotency?.claim.status === "acquired") {
         await this.#idempotency.complete(
           idempotency.key,
           idempotency.digest,
@@ -308,7 +300,7 @@ export class BusinessRuntime {
         }
       }
 
-      if (idempotency?.acquired) {
+      if (idempotency?.claim.status === "acquired") {
         await this.#idempotency.fail(
           idempotency.key,
           idempotency.digest,
@@ -352,7 +344,7 @@ export class BusinessRuntime {
     | {
         key: string;
         digest: string;
-        acquired: boolean;
+        claim: IdempotencyClaim<ExecutionResult>;
       }
     | undefined
   > {
@@ -387,26 +379,10 @@ export class BusinessRuntime {
     const digest = idempotencyRequestDigest(capability, request);
     const claim = await this.#idempotency.claim(key, digest);
 
-    if (claim.status === "replay") {
-      return {
-        key,
-        digest,
-        acquired: false,
-      };
-    }
-
-    if (claim.status === "in_flight") {
-      return {
-        key,
-        digest,
-        acquired: false,
-      };
-    }
-
     return {
       key,
       digest,
-      acquired: true,
+      claim,
     };
   }
 
