@@ -405,3 +405,47 @@ test("capability registry requires an explicit version when multiple versions ex
     "0.2.0",
   );
 });
+
+
+test("concurrent duplicate mutation is blocked while the first request is in flight", async () => {
+  const contract = capability({ approval: "none" });
+
+  let releaseConnector!: () => void;
+  const connectorGate = new Promise<void>((resolve) => {
+    releaseConnector = resolve;
+  });
+
+  let calls = 0;
+  const h = harness({
+    contract,
+    connector: new FunctionConnectorExecutor(async () => {
+      calls += 1;
+      await connectorGate;
+      return { orderId: "order-1" };
+    }),
+  });
+
+  const action = request();
+  const first = h.runtime.execute<
+    { sku: string },
+    { orderId: string }
+  >(action);
+
+  await new Promise((resolve) => setImmediate(resolve));
+
+  await assert.rejects(
+    () => h.runtime.execute(action),
+    (error: unknown) =>
+      error instanceof BrivyaError &&
+      error.code === "CONFLICT" &&
+      error.details.reason === "idempotency_in_flight",
+  );
+
+  assert.equal(calls, 1);
+
+  releaseConnector();
+  const completed = await first;
+
+  assert.equal(completed.output.orderId, "order-1");
+  assert.equal(calls, 1);
+});
