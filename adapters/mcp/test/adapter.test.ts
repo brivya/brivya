@@ -159,10 +159,17 @@ function harness(options: {
 
 function errorCode(
   result: {
-    content: Array<{ type: "text"; text: string }>;
+    content: Array<{ type: string } & Record<string, unknown>>;
   },
 ): string | undefined {
-  const parsed = JSON.parse(result.content[0]?.text ?? "{}") as {
+  const textBlock = result.content.find(
+    (block) => block.type === "text",
+  );
+  const text =
+    textBlock && typeof textBlock.text === "string"
+      ? textBlock.text
+      : "{}";
+  const parsed = JSON.parse(text) as {
     error?: { code?: string };
   };
   return parsed.error?.code;
