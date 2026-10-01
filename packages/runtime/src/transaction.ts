@@ -24,10 +24,10 @@ export interface RuntimeTransaction<Result = unknown> {
 }
 
 export interface TransactionStore {
-  create(
+  create<Result = unknown>(
     capability: CapabilityContract,
     request: ActionRequest,
-  ): RuntimeTransaction | Promise<RuntimeTransaction>;
+  ): RuntimeTransaction<Result> | Promise<RuntimeTransaction<Result>>;
   transition<Result = unknown>(
     id: string,
     status: TransactionStatus,
@@ -64,12 +64,12 @@ export class InMemoryTransactionStore implements TransactionStore {
     this.#idFactory = options.idFactory ?? randomUUID;
   }
 
-  create(
+  create<Result = unknown>(
     capability: CapabilityContract,
     request: ActionRequest,
-  ): RuntimeTransaction {
+  ): RuntimeTransaction<Result> {
     const now = this.#now().toISOString();
-    const record: RuntimeTransaction = {
+    const record: RuntimeTransaction<Result> = {
       id: this.#idFactory(),
       requestId: request.requestId,
       capability: capability.id,
@@ -79,7 +79,7 @@ export class InMemoryTransactionStore implements TransactionStore {
       updatedAt: now,
       correlationId: request.correlationId,
     };
-    this.#records.set(record.id, record);
+    this.#records.set(record.id, record as RuntimeTransaction);
     return { ...record };
   }
 
