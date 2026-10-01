@@ -172,3 +172,40 @@ test("can enforce capability existence through a registry hook", () => {
       error.issues.some((issue) => issue.code === "CAPABILITY_NOT_FOUND"),
   );
 });
+
+
+test("rejects camelCase inline secret keys with explicit security semantics", () => {
+  const parsed = {
+    apiVersion: "brivya.dev/v0alpha1",
+    kind: "BusinessAgent",
+    metadata: {
+      id: "amina-coffee",
+      name: "Amina Coffee",
+      version: "0.1.0",
+    },
+    identity: {
+      canonicalUrl: "https://amina-coffee.agent.brivya.com",
+      domains: ["amina-coffee.agent.brivya.com"],
+    },
+    discovery: {
+      public: true,
+      locales: ["en-US"],
+    },
+    capabilities: [],
+    security: {
+      defaultAuth: "oauth2",
+      audit: "required",
+    },
+    clientSecret: "must-not-be-here",
+  };
+
+  const result = validateBusinessAgentManifest(parsed);
+  assert.equal(result.valid, false);
+  assert.ok(
+    result.issues.some(
+      (issue) =>
+        issue.code === "SECRET_INLINE_FORBIDDEN" &&
+        issue.path === "$.clientSecret",
+    ),
+  );
+});
