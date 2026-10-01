@@ -35,7 +35,7 @@ jobs:
           test -f package.json
           test -f tsconfig.json
           test -f docs/cortex-agent/anchor.md
-          grep -q '"/.agent/"' .gitignore
+          grep -Fxq '/.agent/' .gitignore
           node -e "JSON.parse(require('fs').readFileSync('package.json', 'utf8'))"
 
       - name: Verify monorepo boundaries
