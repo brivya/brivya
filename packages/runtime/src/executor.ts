@@ -110,7 +110,7 @@ export class BusinessRuntime {
       request.capabilityVersion,
     );
 
-    let transaction: RuntimeTransaction | undefined;
+    let transaction: RuntimeTransaction<Output> | undefined;
     let idempotency:
       | {
           key: string;
@@ -201,7 +201,7 @@ export class BusinessRuntime {
         );
       }
 
-      transaction = await this.#transactions.create(
+      transaction = await this.#transactions.create<Output>(
         capability,
         request,
       );
