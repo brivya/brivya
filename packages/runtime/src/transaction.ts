@@ -115,7 +115,7 @@ export class InMemoryTransactionStore implements TransactionStore {
     }
 
     const next: RuntimeTransaction<Result> = {
-      ...current,
+      ...(current as RuntimeTransaction<Result>),
       status,
       updatedAt: this.#now().toISOString(),
       ...(patch.result !== undefined ? { result: patch.result } : {}),
