@@ -1,0 +1,31 @@
+# dependencies
+node_modules/
+
+# build
+dist/
+build/
+coverage/
+*.tsbuildinfo
+
+# env / secrets
+.env
+.env.*
+!.env.example
+
+# editor / OS
+.DS_Store
+.idea/
+.vscode/
+
+# logs
+*.log
+npm-debug.log*
+
+# Cortex governance
+/.agent/
+/.agent-runtime/
+/graphify-out/
+
+# local data
+.brivya/
+data/
