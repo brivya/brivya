@@ -11,10 +11,14 @@
     "examples/*"
   ],
   "scripts": {
-    "build": "npm run build --workspaces --if-present",
-    "test": "npm run test --workspaces --if-present",
-    "typecheck": "npm run typecheck --workspaces --if-present",
-    "lint": "npm run lint --workspaces --if-present"
+    "build": "npm run build -w @brivya/core && npm run build -w @brivya/manifest",
+    "typecheck": "npm run typecheck -w @brivya/core && npm run typecheck -w @brivya/manifest",
+    "test": "npm run build && node --test packages/core/dist/test/*.test.js packages/manifest/dist/test/*.test.js",
+    "ci": "npm run typecheck && npm test"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.1",
+    "typescript": "^5.7.2"
   },
   "engines": {
     "node": ">=20"
