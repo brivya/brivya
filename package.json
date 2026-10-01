@@ -11,9 +11,9 @@
     "examples/*"
   ],
   "scripts": {
-    "build": "npm run build -w @brivya/core && npm run build -w @brivya/manifest",
-    "typecheck": "npm run typecheck -w @brivya/core && npm run typecheck -w @brivya/manifest",
-    "test": "npm run build && node --test packages/core/dist/test/*.test.js packages/manifest/dist/test/*.test.js",
+    "build": "npm run build -w @brivya/core && npm run build -w @brivya/manifest && npm run build -w @brivya/policy && npm run build -w @brivya/runtime",
+    "typecheck": "npm run typecheck -w @brivya/core && npm run typecheck -w @brivya/manifest && npm run typecheck -w @brivya/policy && npm run typecheck -w @brivya/runtime",
+    "test": "npm run build && node --test packages/core/dist/test/*.test.js packages/manifest/dist/test/*.test.js packages/policy/dist/test/*.test.js packages/runtime/dist/test/*.test.js",
     "ci": "npm run typecheck && npm test"
   },
   "devDependencies": {
