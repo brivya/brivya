@@ -1,0 +1,29 @@
+{
+  "name": "@brivya/adapter-mcp",
+  "version": "0.1.0-alpha.1",
+  "description": "MCP adapter for the Brivya Business Runtime.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./dist/src/index.js"
+    }
+  },
+  "types": "./src/index.ts",
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@brivya/core": "0.1.0-alpha.1",
+    "@brivya/runtime": "0.1.0-alpha.1",
+    "@modelcontextprotocol/server": "2.2.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "@brivya/adapter-rest": "0.1.0-alpha.1"
+  }
+}
