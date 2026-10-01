@@ -258,7 +258,10 @@ test("dual control requires two distinct approvers", async () => {
       error.code === "APPROVAL_REQUIRED",
   );
 
-  const result = await h.runtime.execute(action, {
+  const result = await h.runtime.execute<
+    { sku: string },
+    { orderId: string }
+  >(action, {
     approvals: [
       approval(contract, action, "manager-1"),
       approval(contract, action, "manager-2"),
