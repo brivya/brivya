@@ -17,7 +17,7 @@
   "dependencies": {
     "@brivya/core": "0.1.0-alpha.1",
     "@brivya/runtime": "0.1.0-alpha.1",
-    "@modelcontextprotocol/server": "^2.2.0"
+    "@modelcontextprotocol/server": "2.2.0"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
