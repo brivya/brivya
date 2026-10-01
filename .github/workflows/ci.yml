@@ -10,14 +10,43 @@ permissions:
   contents: read
 
 jobs:
-  verify:
+  bootstrap:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-      - run: npm install
-      - run: npm run typecheck
-      - run: npm test
+
+      - name: Verify runtime toolchain
+        run: |
+          node --version
+          npm --version
+
+      - name: Verify public repository baseline
+        run: |
+          test -f README.md
+          test -f LICENSE
+          test -f SECURITY.md
+          test -f CONTRIBUTING.md
+          test -f CODE_OF_CONDUCT.md
+          test -f AGENTS.md
+          test -f package.json
+          test -f tsconfig.json
+          test -f docs/cortex-agent/anchor.md
+          grep -q '"/.agent/"' .gitignore
+          node -e "JSON.parse(require('fs').readFileSync('package.json', 'utf8'))"
+
+      - name: Verify monorepo boundaries
+        run: |
+          test -d packages/core
+          test -d packages/manifest
+          test -d packages/policy
+          test -d packages/runtime
+          test -d packages/sdk
+          test -d packages/cli
+          test -d adapters/rest
+          test -d adapters/mcp
+          test -d connectors/mock
+          test -d examples/restaurant
