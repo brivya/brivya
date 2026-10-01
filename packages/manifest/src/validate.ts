@@ -57,15 +57,14 @@ const ajv = new Ajv2020({
 const validateSchema = ajv.compile(businessAgentManifestSchema);
 
 const FORBIDDEN_SECRET_KEYS = new Set([
-  "api_key",
   "apikey",
   "password",
-  "private_key",
-  "access_token",
-  "refresh_token",
-  "database_url",
-  "payment_secret",
-  "client_secret",
+  "privatekey",
+  "accesstoken",
+  "refreshtoken",
+  "databaseurl",
+  "paymentsecret",
+  "clientsecret",
 ]);
 
 export function validateBusinessAgentManifest(
@@ -193,7 +192,7 @@ function scanForInlineSecrets(
   }
 
   for (const [key, child] of Object.entries(value)) {
-    const normalized = key.toLowerCase();
+    const normalized = key.toLowerCase().replace(/[^a-z0-9]/g, "");
     if (FORBIDDEN_SECRET_KEYS.has(normalized)) {
       issues.push({
         code: "SECRET_INLINE_FORBIDDEN",
