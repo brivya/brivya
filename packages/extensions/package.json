@@ -1,0 +1,22 @@
+{
+  "name": "@brivya/extensions",
+  "version": "0.1.0-alpha.1",
+  "description": "Extension package, permission, host and registry contracts for Brivya.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./dist/src/index.js"
+    }
+  },
+  "types": "./src/index.ts",
+  "files": ["dist"],
+  "dependencies": {
+    "yaml": "^2.7.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  }
+}
