@@ -46,6 +46,7 @@ test("WorkBuddy package preserves canonical capability safety metadata", () => {
       description: "Restaurant service",
       mcpEndpoint: "https://amina.example/mcp",
       authMode: "delegated",
+      credentialRef: "secret://workbuddy-production",
     },
     [capability],
   );
@@ -56,4 +57,39 @@ test("WorkBuddy package preserves canonical capability safety metadata", () => {
   );
   assert.ok(rendered.artifacts["mcp.json"]?.includes('"brivya/approval": "required"'));
   assert.ok(rendered.artifacts["skills/business/SKILL.md"]?.includes("order.create@0.1.0"));
+});
+
+
+test("WorkBuddy renderer rejects embedded credentials and only emits secret references", () => {
+  assert.throws(
+    () =>
+      renderWorkBuddyPackage(
+        {
+          id: "amina-coffee",
+          name: "Amina Coffee",
+          description: "Restaurant service",
+          mcpEndpoint: "https://amina.example/mcp",
+          authMode: "oauth",
+          credentialRef: "raw-access-token",
+        },
+        [capability],
+      ),
+    /secret:\/\//,
+  );
+
+  const rendered = renderWorkBuddyPackage(
+    {
+      id: "amina-coffee",
+      name: "Amina Coffee",
+      description: "Restaurant service",
+      mcpEndpoint: "https://amina.example/mcp",
+      authMode: "oauth",
+      credentialRef: "secret://workbuddy-production",
+    },
+    [capability],
+  );
+
+  const artifacts = Object.values(rendered.artifacts).join("\n");
+  assert.ok(artifacts.includes("secret://workbuddy-production"));
+  assert.equal(/access_token|refresh_token|password|private_key/i.test(artifacts), false);
 });
