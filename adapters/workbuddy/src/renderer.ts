@@ -12,6 +12,7 @@ export interface WorkBuddyBusinessMetadata {
   locale?: string;
   mcpEndpoint: string;
   authMode: string;
+  credentialRef: string;
 }
 
 export interface WorkBuddyPackage {
@@ -23,6 +24,12 @@ export function renderWorkBuddyPackage(
   business: WorkBuddyBusinessMetadata,
   capabilities: readonly CapabilityContract[],
 ): WorkBuddyPackage {
+  if (!business.credentialRef.startsWith("secret://")) {
+    throw new Error(
+      "WorkBuddy credentials must be referenced through secret:// and never embedded.",
+    );
+  }
+
   const projections = capabilities.map(projectCapability);
 
   for (let index = 0; index < capabilities.length; index += 1) {
@@ -45,6 +52,7 @@ export function renderWorkBuddyPackage(
     },
     auth: {
       mode: business.authMode,
+      credentialRef: business.credentialRef,
     },
     capabilities: projections.map((item) => ({
       id: item.id,
