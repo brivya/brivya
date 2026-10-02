@@ -8,6 +8,7 @@ import { basename, resolve } from "node:path";
 
 import {
   BrivyaError,
+  ManifestParseError,
   ManifestValidationError,
   loadManifest,
   validateManifest,
@@ -133,7 +134,7 @@ async function runInit(
     "utf8",
   );
 
-  if (force || !(await exists(gitignorePath))) {
+  if (!(await exists(gitignorePath))) {
     await writeFile(
       gitignorePath,
       starterGitignore,
@@ -362,6 +363,17 @@ function serializeError(
       retryable: false,
       details: {
         issues: error.issues,
+      },
+    };
+  }
+
+  if (error instanceof ManifestParseError) {
+    return {
+      code: "INVALID_INPUT",
+      message: error.message,
+      retryable: false,
+      details: {
+        reason: "manifest_parse_error",
       },
     };
   }
