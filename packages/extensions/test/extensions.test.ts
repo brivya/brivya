@@ -261,3 +261,80 @@ test("Registry client is supply-chain oriented and preserves package state", asy
   assert.equal(record?.status, "published");
   assert.equal(record?.publisher.verified, true);
 });
+
+
+test("Host API rejects unsupported host versions before execution", () => {
+  assert.throws(
+    () =>
+      new ExtensionHostSession({
+        extensionId: "acme/example",
+        hostApiVersion: "0.2" as "0.1",
+        grantedPermissions: [],
+      }),
+    (error: unknown) =>
+      error instanceof ExtensionHostError &&
+      error.code === "VERSION_UNSUPPORTED",
+  );
+});
+
+test("Host API state keys are extension-scoped", async () => {
+  const reads: string[] = [];
+  const writes: Array<{ key: string; value: unknown }> = [];
+  const host = new ExtensionHostSession({
+    extensionId: "acme/example",
+    grantedPermissions: [],
+    bindings: {
+      getState: async (key) => {
+        reads.push(key);
+        return "value";
+      },
+      putState: async (key, value) => {
+        writes.push({ key, value });
+      },
+    },
+  });
+
+  await host.stateGet("cursor");
+  await host.statePut("cursor", "next");
+
+  assert.deepEqual(reads, ["extension:acme/example:cursor"]);
+  assert.deepEqual(writes, [
+    { key: "extension:acme/example:cursor", value: "next" },
+  ]);
+});
+
+test("Host and manifest reject private or insecure outbound destinations", async () => {
+  const manifest = validateExtensionManifest({
+    ...baseManifest,
+    permissions: ["network:outbound"],
+    network: {
+      outbound: {
+        hosts: ["127.0.0.1"],
+      },
+    },
+  });
+  assert.equal(manifest.valid, false);
+
+  const host = new ExtensionHostSession({
+    extensionId: "acme/example",
+    grantedPermissions: ["network:outbound"],
+    outboundHosts: ["127.0.0.1", "api.example.com"],
+    bindings: {
+      networkRequest: async () => ({ ok: true }),
+    },
+  });
+
+  await assert.rejects(
+    () => host.networkRequest("https://127.0.0.1/internal"),
+    (error: unknown) =>
+      error instanceof ExtensionHostError &&
+      error.code === "PERMISSION_DENIED",
+  );
+
+  await assert.rejects(
+    () => host.networkRequest("http://api.example.com/plaintext"),
+    (error: unknown) =>
+      error instanceof ExtensionHostError &&
+      error.code === "PERMISSION_DENIED",
+  );
+});
