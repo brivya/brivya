@@ -6,11 +6,11 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./src/index.ts",
+      "types": "./dist/src/index.d.ts",
       "default": "./dist/src/index.js"
     }
   },
-  "types": "./src/index.ts",
+  "types": "./dist/src/index.d.ts",
   "files": [
     "dist"
   ],
