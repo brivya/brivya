@@ -6,6 +6,13 @@ import {
 } from "node:fs";
 import { resolve } from "node:path";
 
+import { workbuddyProfile } from "@brivya/adapter-workbuddy";
+import { wechatAiProfile } from "@brivya/adapter-wechat-ai";
+import {
+  validateDistributionProfile,
+  type DistributionProfile,
+} from "@brivya/distribution";
+
 import {
   ManifestParseError,
   ManifestValidationError,
@@ -48,6 +55,8 @@ export async function runCli(
         return runInspect(rest, cwd, io);
       case "dev":
         return runDev(rest, cwd, io);
+      case "target":
+        return runTarget(rest, io);
       case "help":
       case "--help":
       case "-h":
@@ -63,6 +72,77 @@ export async function runCli(
     renderError(error, io);
     return 1;
   }
+}
+
+
+const BUILTIN_TARGETS: readonly DistributionProfile[] = [
+  workbuddyProfile,
+  wechatAiProfile,
+];
+
+function runTarget(
+  args: readonly string[],
+  io: CliIo,
+): number {
+  const [subcommand, targetId] = args;
+
+  switch (subcommand) {
+    case "list":
+      io.stdout(
+        JSON.stringify(
+          BUILTIN_TARGETS.map((profile) => ({
+            id: profile.metadata.id,
+            name: profile.metadata.displayName,
+            version: profile.metadata.version,
+            category: profile.target.category,
+            renderer: profile.experience.renderer,
+            support: profile.support,
+          })),
+          null,
+          2,
+        ),
+      );
+      return 0;
+
+    case "inspect": {
+      if (!targetId) {
+        throw new Error("Usage: brivya target inspect <target>");
+      }
+      const profile = resolveTarget(targetId);
+      io.stdout(JSON.stringify(profile, null, 2));
+      return 0;
+    }
+
+    case "validate": {
+      if (!targetId) {
+        throw new Error("Usage: brivya target validate <target>");
+      }
+      const profile = resolveTarget(targetId);
+      const result = validateDistributionProfile(profile);
+      io.stdout(JSON.stringify(result, null, 2));
+      return result.status === "fail" ? 1 : 0;
+    }
+
+    case "publish":
+      throw new Error(
+        "Target publishing is not enabled in the Phase 1 local CLI baseline. Publication requires an explicit authorization workflow.",
+      );
+
+    default:
+      throw new Error(
+        "Usage: brivya target <list|inspect|validate> [target]",
+      );
+  }
+}
+
+function resolveTarget(targetId: string): DistributionProfile {
+  const profile = BUILTIN_TARGETS.find(
+    (candidate) => candidate.metadata.id === targetId,
+  );
+  if (!profile) {
+    throw new Error(`Unknown distribution target: ${targetId}`);
+  }
+  return profile;
 }
 
 function runInit(
@@ -262,13 +342,18 @@ Usage:
   brivya validate [path]
   brivya inspect [path]
   brivya dev [path] [--watch]
+  brivya target list
+  brivya target inspect <target>
+  brivya target validate <target>
 
 Commands:
   init      Create a starter Business Agent Manifest.
   validate  Parse and validate a manifest using @brivya/manifest.
   inspect   Print a normalized, non-secret manifest summary.
   dev       Validate local developer configuration; optionally watch for changes.
+  target    Inspect and validate built-in Distribution Profiles.
 
 The CLI does not implement alternate authorization, policy, approval, connector,
-transaction, or runtime semantics.`;
+transaction, or runtime semantics. Target publish is intentionally unavailable
+until an explicit publication authorization workflow is implemented.`;
 }

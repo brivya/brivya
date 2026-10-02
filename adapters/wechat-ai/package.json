@@ -1,12 +1,9 @@
 {
-  "name": "@brivya/cli",
+  "name": "@brivya/adapter-wechat-ai",
   "version": "0.1.0-alpha.1",
-  "description": "Local developer CLI for Brivya Business Agent manifests.",
+  "description": "WeChat AI reference DistributionProfile renderer for Brivya.",
   "license": "Apache-2.0",
   "type": "module",
-  "bin": {
-    "brivya": "./dist/src/bin.js"
-  },
   "exports": {
     ".": {
       "types": "./src/index.ts",
@@ -14,14 +11,11 @@
     }
   },
   "types": "./src/index.ts",
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "dependencies": {
-    "@brivya/manifest": "0.1.0-alpha.1",
+    "@brivya/core": "0.1.0-alpha.1",
     "@brivya/distribution": "0.1.0-alpha.1",
-    "@brivya/adapter-workbuddy": "0.1.0-alpha.1",
-    "@brivya/adapter-wechat-ai": "0.1.0-alpha.1"
+    "@brivya/experience": "0.1.0-alpha.1"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

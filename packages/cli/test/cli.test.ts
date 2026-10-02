@@ -73,3 +73,53 @@ test("validate fails closed on invalid manifests", async () => {
   );
   assert.ok(output.stderr.some((line) => line.includes("validation failed")));
 });
+
+
+test("target list exposes accepted reference Distribution Profiles", async () => {
+  const output = capture();
+
+  assert.equal(
+    await runCli(["target", "list"], { io: output.io }),
+    0,
+  );
+
+  const targets = JSON.parse(output.stdout.at(-1) ?? "[]") as Array<{
+    id: string;
+  }>;
+  assert.deepEqual(
+    targets.map((target) => target.id),
+    ["workbuddy", "wechat-ai"],
+  );
+});
+
+test("target validate uses the canonical DistributionProfile validator", async () => {
+  const output = capture();
+
+  assert.equal(
+    await runCli(["target", "validate", "wechat-ai"], {
+      io: output.io,
+    }),
+    0,
+  );
+
+  const result = JSON.parse(output.stdout.at(-1) ?? "{}") as {
+    status: string;
+  };
+  assert.equal(result.status, "pass");
+});
+
+test("target publish fails closed until explicit publication authorization exists", async () => {
+  const output = capture();
+
+  assert.equal(
+    await runCli(["target", "publish", "wechat-ai"], {
+      io: output.io,
+    }),
+    1,
+  );
+  assert.ok(
+    output.stderr.some((line) =>
+      line.includes("explicit authorization workflow"),
+    ),
+  );
+});
