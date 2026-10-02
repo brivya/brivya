@@ -341,9 +341,16 @@ async function exists(
   }
 }
 
+interface SerializedCliError {
+  code: string;
+  message: string;
+  retryable: boolean;
+  details: Record<string, unknown>;
+}
+
 function serializeError(
   error: unknown,
-): Record<string, unknown> {
+): SerializedCliError {
   if (error instanceof BrivyaError) {
     return error.toJSON();
   }
