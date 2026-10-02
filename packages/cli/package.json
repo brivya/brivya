@@ -14,9 +14,14 @@
     }
   },
   "types": "./src/index.ts",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "dependencies": {
-    "@brivya/manifest": "0.1.0-alpha.1"
+    "@brivya/manifest": "0.1.0-alpha.1",
+    "@brivya/distribution": "0.1.0-alpha.1",
+    "@brivya/adapter-workbuddy": "0.1.0-alpha.1",
+    "@brivya/adapter-wechat-ai": "0.1.0-alpha.1"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
