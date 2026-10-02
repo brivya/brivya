@@ -46,13 +46,13 @@ export async function runCli(
   try {
     switch (command) {
       case "init":
-        return runInit(argv.slice(1), cwd);
+        return await runInit(argv.slice(1), cwd);
       case "validate":
-        return runValidate(argv.slice(1), cwd);
+        return await runValidate(argv.slice(1), cwd);
       case "inspect":
-        return runInspect(argv.slice(1), cwd);
+        return await runInspect(argv.slice(1), cwd);
       case "dev":
-        return runDev(argv.slice(1), cwd);
+        return await runDev(argv.slice(1), cwd);
       case "help":
       case "--help":
       case "-h":
