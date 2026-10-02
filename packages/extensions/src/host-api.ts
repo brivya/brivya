@@ -3,6 +3,7 @@ import { permissionAllows } from "./permissions.js";
 export type ExtensionHostErrorCode =
   | "INVALID_ARGUMENT"
   | "PERMISSION_DENIED"
+  | "APPROVAL_REQUIRED"
   | "RESOURCE_NOT_FOUND"
   | "CONFLICT"
   | "VERSION_UNSUPPORTED"
@@ -70,12 +71,21 @@ export class ExtensionHostSession {
   readonly hostApiVersion = "0.1" as const;
   readonly extensionId: string;
   readonly grantedPermissions: readonly string[];
+  readonly stateNamespace: string;
 
   private readonly outboundHosts: Set<string>;
   private readonly bindings: ExtensionHostBindings;
 
   constructor(options: ExtensionHostSessionOptions) {
+    if (options.hostApiVersion && options.hostApiVersion !== "0.1") {
+      throw new ExtensionHostError(
+        "VERSION_UNSUPPORTED",
+        `Unsupported Extension Host API version: ${options.hostApiVersion}`,
+      );
+    }
+
     this.extensionId = options.extensionId;
+    this.stateNamespace = `extension:${options.extensionId}`;
     this.grantedPermissions = [...new Set(options.grantedPermissions)].sort();
     this.outboundHosts = new Set(options.outboundHosts ?? []);
     this.bindings = options.bindings ?? {};
@@ -128,6 +138,20 @@ export class ExtensionHostSession {
   ): Promise<unknown> {
     this.require("network:outbound");
     const parsed = new URL(url);
+    if (parsed.protocol !== "https:") {
+      throw new ExtensionHostError(
+        "PERMISSION_DENIED",
+        "Extension outbound network requests must use HTTPS.",
+        { details: { protocol: parsed.protocol } },
+      );
+    }
+    if (isForbiddenNetworkHost(parsed.hostname)) {
+      throw new ExtensionHostError(
+        "PERMISSION_DENIED",
+        `Private/metadata network host is forbidden: ${parsed.hostname}`,
+        { details: { host: parsed.hostname } },
+      );
+    }
     if (!this.outboundHosts.has(parsed.hostname)) {
       throw new ExtensionHostError(
         "PERMISSION_DENIED",
@@ -144,11 +168,20 @@ export class ExtensionHostSession {
   }
 
   async stateGet(key: string): Promise<unknown> {
-    return this.call("state.get", this.bindings.getState, key);
+    return this.call(
+      "state.get",
+      this.bindings.getState,
+      `${this.stateNamespace}:${key}`,
+    );
   }
 
   async statePut(key: string, value: unknown): Promise<void> {
-    await this.call("state.put", this.bindings.putState, key, value);
+    await this.call(
+      "state.put",
+      this.bindings.putState,
+      `${this.stateNamespace}:${key}`,
+      value,
+    );
   }
 
   async secretRequestBinding(reference: string): Promise<OpaqueSecretBinding> {
@@ -205,4 +238,17 @@ export class ExtensionHostSession {
     }
     return fn(...args);
   }
+}
+
+
+function isForbiddenNetworkHost(host: string): boolean {
+  return (
+    host === "localhost" ||
+    host === "127.0.0.1" ||
+    host === "::1" ||
+    host === "169.254.169.254" ||
+    /^10\./.test(host) ||
+    /^192\.168\./.test(host) ||
+    /^172\.(1[6-9]|2\d|3[01])\./.test(host)
+  );
 }
