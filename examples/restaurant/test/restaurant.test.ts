@@ -48,6 +48,29 @@ function harness() {
   return { registry, connector, audit, events, runtime };
 }
 
+test("RST-001 canonical URL bootstraps stable discovery metadata without mutation authority", () => {
+  const manifest = loadBusinessAgentManifest(restaurantManifestYaml);
+
+  assert.equal(
+    manifest.identity.canonicalUrl,
+    "https://amina-coffee.agent.brivya.com",
+  );
+  assert.equal(manifest.discovery.public, true);
+  assert.deepEqual(manifest.discovery.locales, ["en"]);
+  assert.equal(manifest.security.defaultAuth, "delegated");
+  assert.equal(manifest.protocols?.rest?.enabled, true);
+  assert.equal(manifest.protocols?.mcp?.enabled, true);
+  assert.ok(
+    manifest.capabilities.some((capability) => capability.ref === "reservation.create"),
+  );
+
+  // Discovery metadata describes capabilities/auth requirements only.
+  // It contains no trusted Principal, Delegation, or Approval evidence.
+  assert.equal("principal" in manifest, false);
+  assert.equal("delegation" in manifest, false);
+  assert.equal("approvals" in manifest, false);
+});
+
 test("RST-002 manifest validates and capability refs resolve", () => {
   const h = harness();
   const manifest = loadBusinessAgentManifest(restaurantManifestYaml, {
