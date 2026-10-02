@@ -59,18 +59,20 @@ export class RestaurantMockConnector implements ConnectorExecutor {
     };
   }
 
-  execute(context: ConnectorExecutionContext): unknown {
+  execute<Input = unknown, Output = unknown>(
+    context: ConnectorExecutionContext<Input>,
+  ): Output | Promise<Output> {
     switch (context.capability.id) {
       case "menu.search":
-        return this.#menuSearch(context.request.input);
+        return this.#menuSearch(context.request.input) as Output;
       case "availability.check":
-        return this.#availabilityCheck(context.request.input);
+        return this.#availabilityCheck(context.request.input) as Output;
       case "reservation.create":
-        return this.#reservationCreate(context.request.input);
+        return this.#reservationCreate(context.request.input) as Output;
       case "order.create":
-        return this.#orderCreate(context.request.input);
+        return this.#orderCreate(context.request.input) as Output;
       case "payment.request":
-        return this.#paymentRequest(context.request.input);
+        return this.#paymentRequest(context.request.input) as Output;
       default:
         throw new BrivyaError(
           "CAPABILITY_UNAVAILABLE",
