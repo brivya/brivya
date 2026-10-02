@@ -215,6 +215,16 @@ export function validateExtensionManifest(
         path: "$.network.outbound.hosts",
         message: "network:outbound requires a non-empty host allowlist.",
       });
+    } else {
+      for (const [index, host] of hosts.entries()) {
+        if (isForbiddenNetworkHost(host)) {
+          issues.push({
+            code: "MANIFEST_INVALID",
+            path: `$.network.outbound.hosts[${index}]`,
+            message: `Private/metadata network host is forbidden: ${host}`,
+          });
+        }
+      }
     }
   }
 
@@ -275,4 +285,17 @@ function scanForInlineSecrets(
     }
     scanForInlineSecrets(child, `${path}.${key}`, issues);
   }
+}
+
+
+function isForbiddenNetworkHost(host: string): boolean {
+  return (
+    host === "localhost" ||
+    host === "127.0.0.1" ||
+    host === "::1" ||
+    host === "169.254.169.254" ||
+    /^10\./.test(host) ||
+    /^192\.168\./.test(host) ||
+    /^172\.(1[6-9]|2\d|3[01])\./.test(host)
+  );
 }
