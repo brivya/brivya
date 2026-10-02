@@ -1,4 +1,7 @@
-import { BrivyaError } from "@brivya/core";
+import {
+  BrivyaError,
+  createZonedBusinessTime,
+} from "@brivya/core";
 import type {
   ConnectorExecutionContext,
   ConnectorExecutor,
@@ -121,6 +124,22 @@ export class RestaurantMockConnector implements ConnectorExecutor {
       guests: number;
       scheduledTime: { dateTime: string; timeZone: string };
     };
+    try {
+      createZonedBusinessTime(
+        value.scheduledTime.dateTime,
+        value.scheduledTime.timeZone,
+      );
+    } catch (error) {
+      throw new BrivyaError(
+        "INVALID_INPUT",
+        "Reservation scheduledTime must contain a consistent RFC3339 offset and IANA timezone.",
+        {
+          cause: error,
+          details: { reason: "invalid_zoned_business_time" },
+        },
+      );
+    }
+
     const id = `res-${++this.#reservationSequence}`;
     const reservation = {
       reservationId: id,
