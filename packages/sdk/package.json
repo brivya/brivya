@@ -1,0 +1,25 @@
+{
+  "name": "@brivya/sdk",
+  "version": "0.1.0-alpha.1",
+  "description": "TypeScript developer facade over Brivya public contracts and runtime.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./dist/src/index.js"
+    }
+  },
+  "types": "./src/index.ts",
+  "files": ["dist"],
+  "dependencies": {
+    "@brivya/core": "0.1.0-alpha.1",
+    "@brivya/manifest": "0.1.0-alpha.1",
+    "@brivya/policy": "0.1.0-alpha.1",
+    "@brivya/runtime": "0.1.0-alpha.1"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  }
+}
