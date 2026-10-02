@@ -1,0 +1,21 @@
+{
+  "name": "@brivya/example-restaurant",
+  "version": "0.1.0-alpha.1",
+  "private": true,
+  "description": "Restaurant reference Business Agent for Brivya.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "dependencies": {
+    "@brivya/adapter-mcp": "0.1.0-alpha.1",
+    "@brivya/adapter-rest": "0.1.0-alpha.1",
+    "@brivya/connector-mock": "0.1.0-alpha.1",
+    "@brivya/core": "0.1.0-alpha.1",
+    "@brivya/manifest": "0.1.0-alpha.1",
+    "@brivya/policy": "0.1.0-alpha.1",
+    "@brivya/runtime": "0.1.0-alpha.1"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  }
+}

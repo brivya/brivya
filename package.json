@@ -11,9 +11,9 @@
     "examples/*"
   ],
   "scripts": {
-    "build": "npm run build -w @brivya/core && npm run build -w @brivya/manifest && npm run build -w @brivya/policy && npm run build -w @brivya/runtime && npm run build -w @brivya/adapter-rest && npm run build -w @brivya/adapter-mcp && npm run build -w @brivya/sdk && npm run build -w @brivya/cli",
-    "typecheck": "npm run typecheck -w @brivya/core && npm run typecheck -w @brivya/manifest && npm run typecheck -w @brivya/policy && npm run typecheck -w @brivya/runtime && npm run typecheck -w @brivya/adapter-rest && npm run typecheck -w @brivya/adapter-mcp && npm run typecheck -w @brivya/sdk && npm run typecheck -w @brivya/cli",
-    "test": "npm run build && node --test packages/core/dist/test/*.test.js packages/manifest/dist/test/*.test.js packages/policy/dist/test/*.test.js packages/runtime/dist/test/*.test.js adapters/rest/dist/test/*.test.js adapters/mcp/dist/test/*.test.js packages/sdk/dist/test/*.test.js packages/cli/dist/test/*.test.js",
+    "build": "npm run build -w @brivya/core && npm run build -w @brivya/manifest && npm run build -w @brivya/policy && npm run build -w @brivya/runtime && npm run build -w @brivya/adapter-rest && npm run build -w @brivya/adapter-mcp && npm run build -w @brivya/sdk && npm run build -w @brivya/cli && npm run build -w @brivya/connector-mock && npm run build -w @brivya/example-restaurant",
+    "typecheck": "npm run typecheck -w @brivya/core && npm run typecheck -w @brivya/manifest && npm run typecheck -w @brivya/policy && npm run typecheck -w @brivya/runtime && npm run typecheck -w @brivya/adapter-rest && npm run typecheck -w @brivya/adapter-mcp && npm run typecheck -w @brivya/sdk && npm run typecheck -w @brivya/cli && npm run typecheck -w @brivya/connector-mock && npm run typecheck -w @brivya/example-restaurant",
+    "test": "npm run build && node --test packages/core/dist/test/*.test.js packages/manifest/dist/test/*.test.js packages/policy/dist/test/*.test.js packages/runtime/dist/test/*.test.js adapters/rest/dist/test/*.test.js adapters/mcp/dist/test/*.test.js packages/sdk/dist/test/*.test.js packages/cli/dist/test/*.test.js examples/restaurant/dist/test/*.test.js",
     "ci": "npm run typecheck && npm test"
   },
   "devDependencies": {
