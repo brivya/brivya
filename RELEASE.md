@@ -158,3 +158,89 @@ After all published packages are configured with npm Trusted Publisher:
 - npm trusted publishing authenticates each `npm publish`
 - provenance is generated automatically for public packages published from this public repository
 - GitHub prerelease/tag creation remains part of the same workflow
+
+## Trusted Publisher migration after alpha.1
+
+After `v0.1.0-alpha.1` bootstrap publication succeeds, migrate all 14 public packages to npm Trusted Publishing.
+
+Prerequisites:
+
+- npm account 2FA enabled
+- write permission for all `@brivya/*` packages
+- npm CLI `>= 11.15.0`
+- GitHub workflow `.github/workflows/release.yml` present on the default branch
+
+Bulk configuration:
+
+```bash
+npm install -g npm@^11.15.0
+npm login
+bash scripts/npm-trust-setup.sh --check
+# Review the entire plan and obtain approval for the persistent permissions.
+bash scripts/npm-trust-setup.sh --apply
+```
+
+The setup script defaults to a read-only check (`--dry-run` is an alias for
+`--check`). Only `--apply` creates missing bindings. Both modes inspect all 14
+packages before any write. The target is:
+
+```text
+provider: GitHub Actions
+repository: brivya/brivya
+workflow: release.yml
+allowed action: npm publish only
+environment: none
+```
+
+An exact existing target is skipped. Any nonmatching publisher, extra permission,
+or environment restriction stops the operation for owner review, including an
+unrelated publisher alongside the expected target. Existing bindings are never
+updated or revoked. This policy does not assume a particular npm limit on the
+number of publishers.
+
+Read/JSON/authentication failures are never treated as a missing binding. Apply
+rechecks each missing package before creating it, verifies each write by reading
+it back, and verifies all 14 again at the end. On the first write/read-back failure,
+it stops further writes and reports created, skipped, failed, and unattempted
+packages. A failed request may still have reached npm. Resolve the reported
+problem and rerun `--check`, then `--apply`; no automatic retry or rollback occurs.
+Created/skipped counts describe confirmed actions and can overlap failed results
+if final verification detects drift. A successful check only validates a plan,
+not the presence of bindings.
+
+The shared Node helper parses the actual npm CLI 11.15 output: whitespace-separated
+JSON objects with flattened `repository`/`file` fields and a `permissions` array;
+`createPackage` grants direct publish. An empty successful list has no stdout.
+Unknown or malformed output fails closed. See the upstream
+[output implementation](https://github.com/npm/cli/blob/v11.15.0/lib/trust-cmd.js)
+and [GitHub field mapping](https://github.com/npm/cli/blob/v11.15.0/lib/commands/trust/github.js).
+Use a stable npm >= 11.15.0, a compatible Node version, account 2FA, and package
+write access. Bypass-2FA granular tokens are not supported by `npm trust`. Commands
+are pinned to `https://registry.npmjs.org/`; normal npm authentication, proxy and
+CA configuration is preserved. Scripts do not install npm, log in, or save
+credentials. Allow npm to complete its interactive 2FA flow. If it fails or times
+out, resolve the error and recheck before applying again.
+
+Hermetic tests (no npm account access or writes):
+
+```bash
+node --test scripts/npm-trust.test.mjs
+```
+
+Verify:
+
+```bash
+bash scripts/npm-trust-verify.sh
+```
+
+After verification:
+
+1. run the OIDC `Release` workflow on a future prerelease;
+2. confirm npm provenance is present;
+3. remove the repository secret `NPM_TOKEN`;
+4. revoke the bootstrap npm token.
+
+Do not remove or revoke the bootstrap token until all 14 bindings are verified
+and an explicitly approved OIDC release succeeds with provenance. Script PASS
+verifies configuration only; it is not evidence of a successful OIDC publication.
+Token removal/revocation and release execution require separate approval.
