@@ -158,3 +158,46 @@ After all published packages are configured with npm Trusted Publisher:
 - npm trusted publishing authenticates each `npm publish`
 - provenance is generated automatically for public packages published from this public repository
 - GitHub prerelease/tag creation remains part of the same workflow
+
+## Trusted Publisher migration after alpha.1
+
+After `v0.1.0-alpha.1` bootstrap publication succeeds, migrate all 14 public packages to npm Trusted Publishing.
+
+Prerequisites:
+
+- npm account 2FA enabled
+- write permission for all `@brivya/*` packages
+- npm CLI `>= 11.15.0`
+- GitHub workflow `.github/workflows/release.yml` present on the default branch
+
+Bulk configuration:
+
+```bash
+npm login
+npm install -g npm@^11.15.0
+bash scripts/npm-trust-setup.sh
+```
+
+The script configures every package with:
+
+```text
+provider: GitHub Actions
+repository: brivya/brivya
+workflow: release.yml
+allowed action: npm publish
+```
+
+Verify:
+
+```bash
+bash scripts/npm-trust-verify.sh
+```
+
+After verification:
+
+1. run the OIDC `Release` workflow on a future prerelease;
+2. confirm npm provenance is present;
+3. remove the repository secret `NPM_TOKEN`;
+4. revoke the bootstrap npm token.
+
+Do not remove the bootstrap token until Trusted Publisher configuration has been verified on all public packages.
