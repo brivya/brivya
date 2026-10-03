@@ -35,6 +35,22 @@ for (const packagePath of packagePaths) {
     );
   }
 
+  const repositoryUrl =
+    typeof pkg.repository === "string" ? pkg.repository : pkg.repository?.url;
+  if (
+    repositoryUrl !== "git+https://github.com/brivya/brivya.git" &&
+    repositoryUrl !== "https://github.com/brivya/brivya"
+  ) {
+    errors.push(`${pkg.name}: repository.url must match brivya/brivya`);
+  }
+
+  if (pkg.publishConfig?.access !== "public") {
+    errors.push(`${pkg.name}: publishConfig.access must be public`);
+  }
+  if (pkg.publishConfig?.tag !== "next") {
+    errors.push(`${pkg.name}: publishConfig.tag must be next`);
+  }
+
   const typesPath = pkg.types;
   const exportTypes = pkg.exports?.["."]?.types;
   const defaultExport = pkg.exports?.["."]?.default;
