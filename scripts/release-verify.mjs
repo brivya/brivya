@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 
-const releaseVersion = "0.1.0-alpha.1";
+const releaseVersion = process.env.RELEASE_VERSION ?? "0.1.0-alpha.1";
 const packagePaths = [
   "packages/cli/package.json",
   "packages/core/package.json",
