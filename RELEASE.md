@@ -135,7 +135,7 @@ For future releases configure npm Trusted Publisher with:
 
 - GitHub organization: `brivya`
 - Repository: `brivya`
-- Workflow filename: the future OIDC release workflow
+- Workflow filename: `release.yml`
 - GitHub-hosted runner
 - `id-token: write`
 
@@ -146,3 +146,15 @@ https://github.com/brivya/brivya
 ```
 
 Trusted publishing should be preferred after the bootstrap publication because it uses short-lived OIDC credentials instead of long-lived npm write tokens.
+
+
+### Subsequent releases
+
+After all published packages are configured with npm Trusted Publisher:
+
+- use `.github/workflows/release.yml`
+- do not provide `NPM_TOKEN`
+- GitHub Actions uses OIDC via `id-token: write`
+- npm trusted publishing authenticates each `npm publish`
+- provenance is generated automatically for public packages published from this public repository
+- GitHub prerelease/tag creation remains part of the same workflow
