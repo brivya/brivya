@@ -109,3 +109,52 @@ If package publication fails partway:
 `P1-D1-DEPLOYMENT-v1` remains separate unless explicitly approved.
 
 This release runbook does not authorize production deployment or managed-cloud rollout.
+
+
+## First-publication authentication
+
+The first publication of a new `@brivya/*` package cannot rely exclusively on npm Trusted Publishing because npm requires the package to already exist before a trusted publisher can be configured.
+
+Bootstrap flow:
+
+1. Create a short-lived npm automation/granular token with permission to publish the `@brivya` scope.
+2. Store it only as the GitHub Actions repository secret `NPM_TOKEN`.
+3. Run `.github/workflows/release-bootstrap.yml` manually with:
+   - `version=0.1.0-alpha.1`
+   - `confirm=RELEASE`
+4. Verify all 14 packages are published with dist-tag `next`.
+5. Configure GitHub Actions as an npm Trusted Publisher for each published package.
+6. Replace bootstrap-token publishing with OIDC trusted publishing for subsequent releases.
+7. Revoke/delete the bootstrap `NPM_TOKEN` after the trusted publisher migration is verified.
+
+Never commit npm credentials to the repository.
+
+### Trusted Publishing target
+
+For future releases configure npm Trusted Publisher with:
+
+- GitHub organization: `brivya`
+- Repository: `brivya`
+- Workflow filename: `release.yml`
+- GitHub-hosted runner
+- `id-token: write`
+
+The package `repository.url` metadata must exactly match:
+
+```text
+https://github.com/brivya/brivya
+```
+
+Trusted publishing should be preferred after the bootstrap publication because it uses short-lived OIDC credentials instead of long-lived npm write tokens.
+
+
+### Subsequent releases
+
+After all published packages are configured with npm Trusted Publisher:
+
+- use `.github/workflows/release.yml`
+- do not provide `NPM_TOKEN`
+- GitHub Actions uses OIDC via `id-token: write`
+- npm trusted publishing authenticates each `npm publish`
+- provenance is generated automatically for public packages published from this public repository
+- GitHub prerelease/tag creation remains part of the same workflow

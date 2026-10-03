@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 
-const releaseVersion = "0.1.0-alpha.1";
+const releaseVersion = process.env.RELEASE_VERSION ?? "0.1.0-alpha.1";
 const packagePaths = [
   "packages/cli/package.json",
   "packages/core/package.json",
@@ -33,6 +33,22 @@ for (const packagePath of packagePaths) {
     errors.push(
       `${pkg.name}: version ${pkg.version} does not match ${releaseVersion}`,
     );
+  }
+
+  const repositoryUrl =
+    typeof pkg.repository === "string" ? pkg.repository : pkg.repository?.url;
+  if (
+    repositoryUrl !== "git+https://github.com/brivya/brivya.git" &&
+    repositoryUrl !== "https://github.com/brivya/brivya"
+  ) {
+    errors.push(`${pkg.name}: repository.url must match brivya/brivya`);
+  }
+
+  if (pkg.publishConfig?.access !== "public") {
+    errors.push(`${pkg.name}: publishConfig.access must be public`);
+  }
+  if (pkg.publishConfig?.tag !== "next") {
+    errors.push(`${pkg.name}: publishConfig.tag must be next`);
   }
 
   const typesPath = pkg.types;

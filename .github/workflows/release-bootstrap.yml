@@ -1,0 +1,135 @@
+name: Alpha Bootstrap Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version (must be 0.1.0-alpha.1)"
+        required: true
+        default: "0.1.0-alpha.1"
+      confirm:
+        description: "Type RELEASE to confirm npm publication"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    if: ${{ inputs.confirm == 'RELEASE' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+          package-manager-cache: false
+
+      - name: Validate requested version
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${{ inputs.version }}" = "0.1.0-alpha.1"
+
+      - name: Install dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund
+
+      - name: Verify release artifacts
+        run: npm run release:verify
+
+      - name: Verify npm token is configured
+        shell: bash
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${NODE_AUTH_TOKEN:-}" ]; then
+            echo "NPM_TOKEN is required for the first @brivya/* bootstrap publication."
+            exit 1
+          fi
+
+      - name: Publish @brivya/core
+        run: npm publish -w @brivya/core --access public --tag next
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @brivya/experience
+        run: npm publish -w @brivya/experience --access public --tag next
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @brivya/manifest
+        run: npm publish -w @brivya/manifest --access public --tag next
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @brivya/policy
+        run: npm publish -w @brivya/policy --access public --tag next
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @brivya/runtime
+        run: npm publish -w @brivya/runtime --access public --tag next
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @brivya/distribution
+        run: npm publish -w @brivya/distribution --access public --tag next
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @brivya/extensions
+        run: npm publish -w @brivya/extensions --access public --tag next
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @brivya/adapter-rest
+        run: npm publish -w @brivya/adapter-rest --access public --tag next
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @brivya/adapter-mcp
+        run: npm publish -w @brivya/adapter-mcp --access public --tag next
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @brivya/adapter-workbuddy
+        run: npm publish -w @brivya/adapter-workbuddy --access public --tag next
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @brivya/adapter-wechat-ai
+        run: npm publish -w @brivya/adapter-wechat-ai --access public --tag next
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @brivya/connector-mock
+        run: npm publish -w @brivya/connector-mock --access public --tag next
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @brivya/sdk
+        run: npm publish -w @brivya/sdk --access public --tag next
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @brivya/cli
+        run: npm publish -w @brivya/cli --access public --tag next
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+
+      - name: Create GitHub prerelease
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release create "v${{ inputs.version }}" \
+            --target "${GITHUB_SHA}" \
+            --title "Brivya v${{ inputs.version }}" \
+            --notes-file CHANGELOG.md \
+            --prerelease \
+            --latest=false

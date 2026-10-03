@@ -25,5 +25,17 @@
   },
   "devDependencies": {
     "@brivya/adapter-rest": "0.1.0-alpha.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brivya/brivya.git"
+  },
+  "homepage": "https://github.com/brivya/brivya#readme",
+  "bugs": {
+    "url": "https://github.com/brivya/brivya/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "tag": "next"
   }
 }
