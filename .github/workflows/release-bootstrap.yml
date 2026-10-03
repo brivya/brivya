@@ -12,7 +12,7 @@ on:
         required: true
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   publish:
@@ -119,3 +119,17 @@ jobs:
         run: npm publish -w @brivya/cli --access public --tag next
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+
+      - name: Create GitHub prerelease
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release create "v${{ inputs.version }}" \
+            --target "${GITHUB_SHA}" \
+            --title "Brivya v${{ inputs.version }}" \
+            --notes-file CHANGELOG.md \
+            --prerelease \
+            --latest=false
