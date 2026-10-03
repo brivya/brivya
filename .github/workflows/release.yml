@@ -1,0 +1,95 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version, for example 0.1.0-alpha.2"
+        required: true
+      dist_tag:
+        description: "npm dist-tag"
+        required: true
+        default: "next"
+      confirm:
+        description: "Type RELEASE to confirm publication"
+        required: true
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  publish:
+    if: ${{ inputs.confirm == 'RELEASE' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+          package-manager-cache: false
+
+      - name: Install dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund
+
+      - name: Verify release artifacts
+        run: npm run release:verify
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+
+      - name: Publish @brivya/core
+        run: npm publish -w @brivya/core --access public --tag "${{ inputs.dist_tag }}"
+
+      - name: Publish @brivya/experience
+        run: npm publish -w @brivya/experience --access public --tag "${{ inputs.dist_tag }}"
+
+      - name: Publish @brivya/manifest
+        run: npm publish -w @brivya/manifest --access public --tag "${{ inputs.dist_tag }}"
+
+      - name: Publish @brivya/policy
+        run: npm publish -w @brivya/policy --access public --tag "${{ inputs.dist_tag }}"
+
+      - name: Publish @brivya/runtime
+        run: npm publish -w @brivya/runtime --access public --tag "${{ inputs.dist_tag }}"
+
+      - name: Publish @brivya/distribution
+        run: npm publish -w @brivya/distribution --access public --tag "${{ inputs.dist_tag }}"
+
+      - name: Publish @brivya/extensions
+        run: npm publish -w @brivya/extensions --access public --tag "${{ inputs.dist_tag }}"
+
+      - name: Publish @brivya/adapter-rest
+        run: npm publish -w @brivya/adapter-rest --access public --tag "${{ inputs.dist_tag }}"
+
+      - name: Publish @brivya/adapter-mcp
+        run: npm publish -w @brivya/adapter-mcp --access public --tag "${{ inputs.dist_tag }}"
+
+      - name: Publish @brivya/adapter-workbuddy
+        run: npm publish -w @brivya/adapter-workbuddy --access public --tag "${{ inputs.dist_tag }}"
+
+      - name: Publish @brivya/adapter-wechat-ai
+        run: npm publish -w @brivya/adapter-wechat-ai --access public --tag "${{ inputs.dist_tag }}"
+
+      - name: Publish @brivya/connector-mock
+        run: npm publish -w @brivya/connector-mock --access public --tag "${{ inputs.dist_tag }}"
+
+      - name: Publish @brivya/sdk
+        run: npm publish -w @brivya/sdk --access public --tag "${{ inputs.dist_tag }}"
+
+      - name: Publish @brivya/cli
+        run: npm publish -w @brivya/cli --access public --tag "${{ inputs.dist_tag }}"
+
+      - name: Create GitHub prerelease
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release create "v${{ inputs.version }}" \
+            --target "${GITHUB_SHA}" \
+            --title "Brivya v${{ inputs.version }}" \
+            --notes-file CHANGELOG.md \
+            --prerelease \
+            --latest=false
