@@ -2,9 +2,11 @@
 
 All notable changes to Brivya are documented here.
 
-## [0.1.0-alpha.1] - Unreleased
+## [0.1.0-alpha.1] - 2026-10-03
 
-First public alpha baseline for Brivya Open Framework.
+First public alpha baseline for Brivya Open Framework. Published through the bootstrap workflow with npm dist-tag `next`.
+
+[GitHub prerelease](https://github.com/brivya/brivya/releases/tag/v0.1.0-alpha.1). Its original release-note snapshot retained the pre-publication “Unreleased” heading; this entry records the actual publication date.
 
 ### Added
 

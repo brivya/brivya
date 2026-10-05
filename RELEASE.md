@@ -1,5 +1,15 @@
 # v0.1.0-alpha.1 Release Runbook
 
+## Publication status (as of 2026-10-05)
+
+- `v0.1.0-alpha.1` was [published as a GitHub prerelease](https://github.com/brivya/brivya/releases/tag/v0.1.0-alpha.1) on 2026-10-03 at 07:28:09 UTC.
+- The tag points to `8bdc668e85838d1fd2c5bcf87686c765823ab6b0`; the successful [Alpha Bootstrap Release run 37106387719](https://github.com/brivya/brivya/actions/runs/37106387719) used that commit.
+- All 14 public packages listed below were published at `0.1.0-alpha.1`; public registry metadata rechecked on 2026-10-05 shows `next` pointing to that version for every package.
+- [PR #15](https://github.com/brivya/brivya/pull/15) added migration tools and was merged as `8102d710e9c7c088971b7816aa44b64ac21a5cf5`; [main CI 37116121184](https://github.com/brivya/brivya/actions/runs/37116121184) passed. This later commit is not the alpha.1 release tag.
+- **npm Trusted Publishing remains pending**: actual npm-side authorization has not been completed, and no successful OIDC publication is established by the bootstrap release or the migration-tool CI. Configuration verification, a separately approved OIDC release with provenance, and separately approved bootstrap-token retirement remain outstanding.
+
+The steps below preserve the bootstrap procedure and future migration requirements. The completed alpha.1 publication must not be rerun.
+
 ## Goal
 
 Produce the first public Brivya alpha from a clean, reproducible and governed main branch.
