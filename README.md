@@ -49,7 +49,7 @@ WeChat AI / WorkBuddy / MCP Hosts / future platforms
 
 ## Current status
 
-Brivya is currently in **v0.1.0-alpha.1 Release Readiness**.
+Brivya **[v0.1.0-alpha.1](https://github.com/brivya/brivya/releases/tag/v0.1.0-alpha.1) was released on 2026-10-03**. All 14 public npm packages are available at `0.1.0-alpha.1` under the `next` dist-tag.
 
 Phase 1 implementation milestones completed:
 
@@ -62,7 +62,9 @@ Phase 1 implementation milestones completed:
 - ✅ DistributionProfile + SemanticExperience
 - ✅ WorkBuddy + WeChat AI reference projections
 - ✅ Extension Host baseline
-- 🚧 v0.1.0-alpha.1 release readiness
+- ✅ v0.1.0-alpha.1 release readiness and bootstrap publication
+
+npm Trusted Publishing configuration and end-to-end OIDC publication verification remain **pending**. See the [release status and migration runbook](RELEASE.md#publication-status-as-of-2026-10-05).
 
 Public APIs are still pre-stable and may change before v1.
 
