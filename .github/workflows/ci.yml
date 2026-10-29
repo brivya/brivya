@@ -3,6 +3,9 @@ name: CI
 on:
   pull_request:
   push:
+    # PRs validate development branches; keep post-merge and tag validation.
+    branches: [main]
+    tags: ["**"]
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
